@@ -1,0 +1,229 @@
+{
+    "annotations": {
+        "list": [{
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+        }]
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "id": 1,
+    "links": [],
+    "panels": [{
+            "collapsed": true,
+            "datasource": null,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 0
+            },
+            "id": 10,
+            "panels": [],
+            "title": "Pull Requests",
+            "type": "row"
+        },
+        {
+            "datasource": null,
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": null
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [{
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 1
+            },
+            "id": 12,
+            "options": {
+                "showHeader": true
+            },
+            "pluginVersion": "7.0.6",
+            "targets": [{
+                "rawQuery": true,
+                "refId": "A",
+                "target": "db.github-issues.aggregate( [\n    {\"$match\":{\"$and\":[{\"type\":\"PULL_REQUESTS\"},{\"data.merged_at\":null},{\"data.state\": {\"$not\" : {\"$regex\":\"/closed$/\"}}}]}},\n    {\"$addFields\": {\"title\":\"$data.title\",\"created\":{\"$toDate\":\"$createdAt\"}}},\n    {\"$project\":{\"_id\":0,\"id\":0,\"type\":0,\"data\":0,\"createdAt\":0}},\n    { \"$sort\":{\"createdAt\":-1}},\n   { \"$limit\": 10 }\n] )",
+                "type": "table"
+            }],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "10 Newest open unmerged Pull Requests",
+            "type": "table"
+        },
+        {
+            "datasource": null,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 9
+            },
+            "id": 8,
+            "title": "Issues",
+            "type": "row"
+        },
+        {
+            "datasource": null,
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {},
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [{
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 9,
+                "w": 12,
+                "x": 0,
+                "y": 10
+            },
+            "id": 2,
+            "options": {
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "mean"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true
+            },
+            "pluginVersion": "7.0.6",
+            "targets": [{
+                "rawQuery": true,
+                "refId": "A",
+                "target": "db.github-issues.aggregate(\n    [\n        { \n            \"$match\": \n            { \n                \"$and\":[{\"type\": \"ISSUES\"},{\"data.comments\": { \"$lt\": 1} }]\n            } \n        },\n        {\n          \"$count\": \"uncommented_issues\"\n    }\n    ]\n)",
+                "type": "table"
+            }],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "uncommented issues",
+            "type": "gauge"
+        },
+        {
+            "collapsed": false,
+            "datasource": null,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 19
+            },
+            "id": 6,
+            "panels": [],
+            "title": "Commits",
+            "type": "row"
+        },
+        {
+            "datasource": null,
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": null
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [{
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 20
+            },
+            "id": 4,
+            "options": {
+                "showHeader": true
+            },
+            "pluginVersion": "7.0.6",
+            "targets": [{
+                "rawQuery": true,
+                "refId": "A",
+                "target": "db.github-issues.aggregate( [\n    {\"$match\":{\"type\":\"COMMITS\"}},\n  {\n    \"$group\": {\n       \"_id\": \"$data.author.login\",\n       \"count\": { \"$sum\": 1 }\n    }\n  },\n  {\"$sort\":{\"count\":-1}},\n  {\"$limit\":10}\n] )",
+                "type": "table"
+            }],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Top 10 Commiter",
+            "type": "table"
+        }
+    ],
+    "refresh": false,
+    "schemaVersion": 25,
+    "style": "dark",
+    "tags": [],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "2020-07-12T01:56:03.407Z",
+        "to": "2020-07-12T13:56:03.407Z"
+    },
+    "timepicker": {
+        "refresh_intervals": [
+            "10s",
+            "30s",
+            "1m",
+            "5m",
+            "15m",
+            "30m",
+            "1h",
+            "2h",
+            "1d"
+        ]
+    },
+    "timezone": "",
+    "title": "GitHubDashboard",
+    "uid": "kXDbYm7Gk",
+    "version": 3
+}
