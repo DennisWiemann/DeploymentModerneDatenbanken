@@ -1,6 +1,7 @@
 ---
 version: '2'
 services:
+# Zookeeper
   zookeeper:
     image: confluentinc/cp-zookeeper:5.5.1
     hostname: zookeeper
@@ -14,6 +15,7 @@ services:
       driver: none
     restart: always
 
+# Kafka
   broker:
     image: confluentinc/cp-server:5.5.1
     hostname: broker
@@ -25,9 +27,9 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_METRIC_REPORTERS: 'io.confluent.metrics.reporter.ConfluentMetricsReporter'
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
@@ -40,6 +42,7 @@ services:
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
     restart: always
 
+# Schema-Registry
   schema-registry:
     image: confluentinc/cp-schema-registry:5.5.1
     hostname: schema-registry
@@ -56,6 +59,7 @@ services:
       driver: none
     restart: always
 
+# Kafka-Connect
   connect:
     image: cnfldemos/cp-server-connect-datagen:0.3.2-5.5.0
     hostname: connect
@@ -68,7 +72,7 @@ services:
     ports:
       - "8083:8083"
     volumes:
-      - $PWD/connect-plugins:/connect-plugins
+      - ./connect-plugins:/connect-plugins
     environment:
       CONNECT_BOOTSTRAP_SERVERS: 'broker:29092'
       CONNECT_REST_ADVERTISED_HOST_NAME: connect
@@ -95,6 +99,7 @@ services:
       CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
     restart: always
 
+# Control-Center
   control-center:
     image: confluentinc/cp-enterprise-control-center:5.5.1
     hostname: control-center
@@ -121,6 +126,7 @@ services:
       PORT: 9021
     restart: always
 
+#KSQLDB-Server
   ksqldb-server:
     image: confluentinc/cp-ksqldb-server:5.5.1
     hostname: ksqldb-server
@@ -144,6 +150,7 @@ services:
       driver: none
     restart: always
 
+#KSQLDB-CLI
   ksqldb-cli:
     image: confluentinc/cp-ksqldb-cli:5.5.1
     container_name: ksqldb-cli
@@ -157,6 +164,7 @@ services:
       driver: none
     restart: always
 
+#KSQLDB-Datagen
   ksql-datagen:
     image: confluentinc/ksqldb-examples:5.5.1
     hostname: ksql-datagen
@@ -182,6 +190,7 @@ services:
       driver: none
     restart: always
 
+# Kafka-REST-Proxy
   rest-proxy:
     image: confluentinc/cp-kafka-rest:5.5.1
     depends_on:
@@ -201,12 +210,12 @@ services:
       driver: none
     restart: always
 
-  # MongoDB Replica Set
+# MongoDB 
   mongo:
     image: "mongo:4.0-xenial"
     container_name: mongo
     volumes:
-      - $PWD/mongo-data:/data/db
+      - ./mongo-data:/data/db
     ports:
       - "27017:27017"
     restart: always
@@ -218,10 +227,11 @@ services:
     image: grafana/grafana:latest
     hostname: grafana
     volumes:
-      - $PWD/mongodb-grafana:/data/db
+      - ./mongodb-grafana:/data/db
+      - grafana-storage:/var/lib/grafana
     ports:
       - 3000:3000
-    user: "104"
+    user: "1000"
     environment: 
       GF_INSTALL_PLUGINS: https://github.com/JamesOsgood/mongodb-grafana/archive/master.zip;custom-plugin
     depends_on:
@@ -238,3 +248,8 @@ services:
     depends_on:
       - mongo
     restart: always
+
+# Volumes
+volumes:
+  grafana-storage:
+
